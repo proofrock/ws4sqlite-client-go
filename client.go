@@ -16,6 +16,8 @@
 
 package ws4sqlite_client
 
+// 0.9.0-rc1
+
 import (
 	"bytes"
 	"encoding/json"
