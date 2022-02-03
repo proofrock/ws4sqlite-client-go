@@ -78,10 +78,14 @@ func TestRequestWithHTTPAuth(t *testing.T) {
 		t.Error(err)
 	}
 
-	res, err := client.Send(request)
+	res, code, err := client.Send(request)
 
 	if err != nil {
 		t.Error(err)
+	}
+
+	if code != 200 {
+		t.Error("return code is not 200")
 	}
 
 	if len(res.Results) != 5 {
@@ -152,10 +156,14 @@ func TestRequestWithInlineAuth(t *testing.T) {
 		t.Error(err)
 	}
 
-	res, err := client.Send(request)
+	res, code, err := client.Send(request)
 
 	if err != nil {
 		t.Error(err)
+	}
+
+	if code != 200 {
+		t.Error("return code is not 200")
 	}
 
 	if len(res.Results) != 5 {
@@ -196,5 +204,43 @@ func TestRequestWithInlineAuth(t *testing.T) {
 	}
 	if res.Results[4].RowsUpdatedBatch[0] != 1 {
 		t.Error("res.Results[4].RowsUpdatedBatch[0] != 1")
+	}
+}
+
+func TestError(t *testing.T) {
+	client, err := ws4.NewClientBuilder().
+		WithURLComponents(ws4.PROTOCOL_HTTP, "localhost", 12321, "mydb2").
+		WithInlineAuth("myUser1", "myHotPassword").
+		Build()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	request, err := ws4.NewRequestBuilder().
+		AddQuery("SELENCT * FROM TEMP").
+		Build()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, code, err := client.Send(request)
+
+	if err == nil {
+		t.Error("did not fail, but should have")
+	}
+
+	if code == 200 {
+		t.Error("did return 200, but shouldn't have")
+	}
+
+	wserr, ok := err.(ws4.WsError)
+	if !ok {
+		t.Error("err is not a WsError")
+	}
+
+	if wserr.Code != 500 {
+		t.Error("error is not 500")
 	}
 }

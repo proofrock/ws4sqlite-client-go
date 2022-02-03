@@ -99,7 +99,7 @@ func (cb *ClientBuilder) Build() (*Client, error) {
 	return &Client{*cb}, nil
 }
 
-func (c *Client) Send(req *Request) (*Response, error) {
+func (c *Client) Send(req *Request) (*Response, int, error) {
 	if c.authMode == AUTH_MODE_INLINE {
 		req.req.Credentials = &credentials{
 			User: c.user,
@@ -109,13 +109,13 @@ func (c *Client) Send(req *Request) (*Response, error) {
 
 	jsonData, err := json.Marshal(req.req)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	client := &http.Client{}
 	post, err := http.NewRequest("POST", c.url, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	if c.authMode == AUTH_MODE_HTTP {
 		post.SetBasicAuth(c.user, c.pass)
@@ -123,19 +123,30 @@ func (c *Client) Send(req *Request) (*Response, error) {
 	post.Header.Add("Content-Type", "application/json")
 	resp, err := client.Do(post)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, resp.StatusCode, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		wserr := WsError{}
+		err = json.Unmarshal(body, &wserr)
+		if err != nil {
+			wserr.QueryIndex = -1
+			wserr.Msg = string(body)
+		}
+		wserr.Code = resp.StatusCode
+		return nil, resp.StatusCode, wserr
+	}
 
 	var res response
 	err = json.Unmarshal(body, &res)
 	if err != nil {
-		return nil, err
+		return nil, resp.StatusCode, err
 	}
 
 	var Res = Response{Results: make([]ResponseItem, 0)}
@@ -154,7 +165,7 @@ func (c *Client) Send(req *Request) (*Response, error) {
 					var v2 interface{}
 					err = json.Unmarshal(v, &v2)
 					if err != nil {
-						return nil, err
+						return nil, resp.StatusCode, err
 					}
 					Rirsi[k] = v2
 				}
@@ -165,5 +176,5 @@ func (c *Client) Send(req *Request) (*Response, error) {
 		Res.Results = append(Res.Results, Ri)
 	}
 
-	return &Res, nil
+	return &Res, resp.StatusCode, nil
 }
