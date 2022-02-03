@@ -27,21 +27,41 @@ import (
 	"net/http"
 )
 
+// Authentication mode for the database remote.
 type AuthMode string
 
 const (
-	AUTH_MODE_HTTP   AuthMode = "HTTP"
+	// HTTP Basic Authentication
+	AUTH_MODE_HTTP AuthMode = "HTTP"
+	// Credentials are inlined in the request
 	AUTH_MODE_INLINE AuthMode = "INLINE"
-	AUTH_MODE_NONE   AuthMode = "NONE"
+	// No authentication
+	AUTH_MODE_NONE AuthMode = "NONE"
 )
 
+// Used in URL composition
 type Protocol string
 
 const (
-	PROTOCOL_HTTP  Protocol = "http"
+	// Adds http://
+	PROTOCOL_HTTP Protocol = "http"
+	// Adds https://
 	PROTOCOL_HTTPS Protocol = "https"
 )
 
+// This class is a builder for Client instances. Once configured with the URL to
+// contact and the authorization (if any), it can be used to instantiate a Client.
+//
+// Example:
+//
+//   cli, err := ws4.NewClientBuilder().
+//                  WithURL("http://localhost:12321/db2").
+//                  WithInlineAuth("myUser1", "myHotPassword").
+//                  Build()
+//
+//   cli.Send(...)
+//
+//
 type ClientBuilder struct {
 	url      string
 	authMode AuthMode
@@ -49,29 +69,46 @@ type ClientBuilder struct {
 	pass     string
 }
 
+// This struct represent a client for ws4sqlite. It can be constructed using the
+// ClientBuilder struct, that configures it with the URL to contact and the authorization
+// (if any). Once instantiated, it can be used to send Requests to the server.
+//
+// Example:
+//
+//   cli, err := ws4.NewClientBuilder().
+//                  WithURL("http://localhost:12321/db2").
+//                  WithInlineAuth("myUser1", "myHotPassword").
+//                  Build()
+//
+//   cli.Send(...)
 type Client struct {
 	ClientBuilder
 }
 
+// First step when building. Generates a new ClientBuilder instance.
 func NewClientBuilder() *ClientBuilder {
 	return &ClientBuilder{authMode: AUTH_MODE_NONE}
 }
 
+// Builder methods that adds a "raw" URL for contacting the ws4sqlite remote.
 func (cb *ClientBuilder) WithURL(url string) *ClientBuilder {
 	cb.url = url
 	return cb
 }
 
+// Builder methods that adds an URL for contacting the ws4sqlite remote, given its components.
 func (cb *ClientBuilder) WithURLComponents(protocol Protocol, host string, port int, databaseId string) *ClientBuilder {
 	cb.url = fmt.Sprintf("%s://%s:%d/%s", protocol, host, port, databaseId)
 	return cb
 }
 
+// Builder methods that adds an URL for contacting the ws4sqlite remote, given its components but with an implicit port.
 func (cb *ClientBuilder) WithURLComponentsNoPort(protocol Protocol, host string, databaseId string) *ClientBuilder {
 	cb.url = fmt.Sprintf("%s://%s/%s", protocol, host, databaseId)
 	return cb
 }
 
+// Builder methods that configures INLINE authentication; the remote must be configured accordingly.
 func (cb *ClientBuilder) WithInlineAuth(user, pass string) *ClientBuilder {
 	cb.authMode = AUTH_MODE_INLINE
 	cb.user = user
@@ -79,6 +116,7 @@ func (cb *ClientBuilder) WithInlineAuth(user, pass string) *ClientBuilder {
 	return cb
 }
 
+// Builder methods that configures HTTP Basic Authentication; the remote must be configured accordingly.
 func (cb *ClientBuilder) WithHTTPAuth(user, pass string) *ClientBuilder {
 	cb.authMode = AUTH_MODE_HTTP
 	cb.user = user
@@ -86,6 +124,7 @@ func (cb *ClientBuilder) WithHTTPAuth(user, pass string) *ClientBuilder {
 	return cb
 }
 
+// Returns the Client that was built.
 func (cb *ClientBuilder) Build() (*Client, error) {
 	if cb.url == "" {
 		return nil, errors.New("no url specified")
@@ -99,6 +138,11 @@ func (cb *ClientBuilder) Build() (*Client, error) {
 	return &Client{*cb}, nil
 }
 
+// Sends a set of requests to the remote, wrapped in a Request struct. Returns
+// a matching set of responses, wrapped in a Response struct.
+//
+// Returns a WsError if the remote service returns a processing error. If the
+// communication fails, it returns the "naked" error, so check for cast-ability.
 func (c *Client) Send(req *Request) (*Response, int, error) {
 	if c.authMode == AUTH_MODE_INLINE {
 		req.req.Credentials = &credentials{

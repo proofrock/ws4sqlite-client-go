@@ -84,9 +84,9 @@ if err != nil {
 // - RowsUpdatedBatch: if the node was a statement and a batch of values was
 //                     provided; it's a slice of the numbers of updated rows
 //                     for each batch item;
-// - ResultSet(): if the node was a query; it's a slice of maps with an item
-//                per returned record, and each map has the name of the filed
-//                as a key of each entry, and the value as a value.
+// - ResultSet: if the node was a query; it's a slice of maps with an item
+//              per returned record, and each map has the name of the filed
+//              as a key of each entry, and the value as a value.
 fmt.Printf("Number of responses: %d\n", len(res.Results))
 
 fmt.Printf("Was 1st response successful? %t\n", res.Results[0].Success)

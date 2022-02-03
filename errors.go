@@ -16,10 +16,17 @@
 
 package ws4sqlite_client
 
+// This is an exception that wraps the error structure of ws4sqlite. See the docs at
+// https://germ.gitbook.io/ws4sqlite/documentation/errors#global-errors
+//
+// It has fields for the error message, the index of the node that failed, and for the HTTP code.</p>
 type WsError struct {
-	QueryIndex int    `json:"qryIdx"`
-	Msg        string `json:"error"`
-	Code       int    `json:"-"`
+	// The index of the statement/query that failed
+	QueryIndex int `json:"qryIdx"`
+	// Error message
+	Msg string `json:"error"`
+	// HTTP code
+	Code int `json:"-"`
 }
 
 func (m WsError) Error() string {

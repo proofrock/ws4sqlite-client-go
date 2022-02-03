@@ -44,20 +44,28 @@ type request struct {
 	Transaction []requestItem `json:"transaction"`
 }
 
+// A builder class to build a Request to send to the ws4sqlite server with the <Client>.Send(Request) method.
+//
+// If an error is encountered during built, it's returned at Build() time, to be
+// able to chain.
 type RequestBuilder struct {
 	err  string
 	list request
 	temp *requestItem
 }
 
+// Container class for a request to ws4sqlite. Built with RequestBuilder.
 type Request struct {
 	req request
 }
 
+// First step when building. Generates a new RequestBuilder instance.
 func NewRequestBuilder() *RequestBuilder {
 	return &RequestBuilder{list: request{Transaction: make([]requestItem, 0)}}
 }
 
+// Adds a new request to the list, for a query. It must be configured later on with the
+// proper methods.
 func (rb *RequestBuilder) AddQuery(query string) *RequestBuilder {
 	if rb.err != "" {
 		return rb
@@ -70,6 +78,8 @@ func (rb *RequestBuilder) AddQuery(query string) *RequestBuilder {
 	return rb
 }
 
+// Adds a new request to the list, for a statement. It must be configured later on with the
+// proper methods.
 func (rb *RequestBuilder) AddStatement(statement string) *RequestBuilder {
 	if rb.err != "" {
 		return rb
@@ -82,6 +92,7 @@ func (rb *RequestBuilder) AddStatement(statement string) *RequestBuilder {
 	return rb
 }
 
+// Specify that the request must not cause a general failure.
 func (rb *RequestBuilder) WithNoFail() *RequestBuilder {
 	if rb.err != "" {
 		return rb
@@ -90,6 +101,8 @@ func (rb *RequestBuilder) WithNoFail() *RequestBuilder {
 	return rb
 }
 
+// Adds a list of values (ok, amap) for the request. If there's already one,
+// it creates a batch.
 func (rb *RequestBuilder) WithValues(values map[string]interface{}) *RequestBuilder {
 	if rb.err != "" {
 		return rb
@@ -113,6 +126,7 @@ func (rb *RequestBuilder) WithValues(values map[string]interface{}) *RequestBuil
 	return rb
 }
 
+// Add an encoder to the request, with compression. Allowed only for statements.
 func (rb *RequestBuilder) WithEncoderAndCompression(password string, compressionLevel int, columns ...string) *RequestBuilder {
 	if rb.err != "" {
 		return rb
@@ -137,6 +151,7 @@ func (rb *RequestBuilder) WithEncoderAndCompression(password string, compression
 	return rb
 }
 
+// Add an encoder to the request. Allowed only for statements.
 func (rb *RequestBuilder) WithEncoder(password string, columns ...string) *RequestBuilder {
 	if rb.err != "" {
 		return rb
@@ -156,6 +171,7 @@ func (rb *RequestBuilder) WithEncoder(password string, columns ...string) *Reque
 	return rb
 }
 
+// Add a decoder to the request. Allowed only for queries.
 func (rb *RequestBuilder) WithDecoder(password string, columns ...string) *RequestBuilder {
 	if rb.err != "" {
 		return rb
@@ -175,6 +191,8 @@ func (rb *RequestBuilder) WithDecoder(password string, columns ...string) *Reque
 	return rb
 }
 
+// Returns the Request that was built, returning also any error that was
+// encountered during build.
 func (rb *RequestBuilder) Build() (*Request, error) {
 	if rb.temp == nil {
 		rb.err = "There are no requests"
