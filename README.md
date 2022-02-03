@@ -1,6 +1,6 @@
 # 🌱 ws4sqlite client for Go(lang)
 
-[![javadoc](https://javadoc.io/badge2/it.germanorizzo.ws4sqlite/ws4sqlite-client-jvm/javadoc.svg)](https://javadoc.io/doc/it.germanorizzo.ws4sqlite/ws4sqlite-client-jvm)
+[pkg.go.dev Docs](https://pkg.go.dev/github.com/proofrock/ws4sqlite-client-go)
 
 This is an implementation of a client for [ws4sqlite](https://github.com/proofrock/ws4sqlite) to use with Go. It adds convenience to the communication, by not having to deal with JSON, by performing checks for the requests being well formed and by mapping errors to JDK's exceptions.
 
