@@ -22,7 +22,7 @@ package ws4sqlite_client
 // It has fields for the error message, the index of the node that failed, and for the HTTP code.</p>
 type WsError struct {
 	// The index of the statement/query that failed
-	QueryIndex int `json:"qryIdx"`
+	RequestIdx int `json:"reqIdx"`
 	// Error message
 	Msg string `json:"error"`
 	// HTTP code

@@ -6,7 +6,7 @@ This is an implementation of a client for [ws4sqlite](https://github.com/proofro
 
 ## Compatibility
 
-Each client's minor release is guaranteed to be compatible with the matching minor release of ws4sqlite. So, for ws4sqlite's version `0.9.0`, use any of the client's `0.9.x` versions.
+Each client's minor release is guaranteed to be compatible with the matching minor release of ws4sqlite. So, for ws4sqlite's version `0.10.0`, use any of the client's `0.10.x` versions.
 
 The library requires Go 1.17 or higher.
 
@@ -21,6 +21,10 @@ go get github.com/proofrock/ws4sqlite-client-go
 This is a translation in Go code of the "everything included" request documented in [the docs](https://germ.gitbook.io/ws4sqlite/documentation/requests). It shows the usage, overall; please refer to the [go docs]() for details.
 
 ```go
+import ws4 "github.com/proofrock/ws4sqlite-client-go"
+
+//...
+
 // Prepare a client for the transmission. Not thread safe, but cheap to build.
 cli, err := ws4.NewClientBuilder().
 	WithURL("http://localhost:12321/db2").
@@ -31,7 +35,7 @@ if err != nil {
 	panic(err)
 }
 
-// Prepare the request, adding different queries/statements. See the docs for a 
+// Prepare the request, adding different queries/statements. See the docs for a
 // detailed explanation, should be fairly 1:1 to the request at
 // https://germ.gitbook.io/ws4sqlite/documentation/requests
 req, err := ws4.NewRequestBuilder().
@@ -71,7 +75,7 @@ if err != nil {
 	// It contains the same fields from
 	// https://germ.gitbook.io/ws4sqlite/documentation/errors#global-errors
 	fmt.Printf("HTTP Code: %d\n", wserr.Code)
-	fmt.Printf("At subrequest: %d\n", wserr.QueryIndex)
+	fmt.Printf("At subrequest: %d\n", wserr.RequestIdx)
 	fmt.Printf("Error: %s\n", wserr.Msg) // or wserr.Error()
 	panic("see above")
 }
@@ -95,3 +99,5 @@ fmt.Printf("How many records had the 1st response? %d\n", len(res.Results[0].Res
 
 fmt.Printf("What was the first VAL returned? %s\n", res.Results[0].ResultSet[0]["VAL"])
 ```
+
+The encryption extension is supported and [documented](https://pkg.go.dev/github.com/proofrock/ws4sqlite-client-go#RequestBuilder.WithDecoder). 
