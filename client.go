@@ -16,7 +16,7 @@
 
 package ws4sqlite_client
 
-// 0.10.0rc1
+// 0.10.0
 
 import (
 	"bytes"
