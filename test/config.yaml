@@ -5,7 +5,7 @@ databases:
       mode: HTTP
       byCredentials:
         - user: myUser1
-          pass: myHotPassword
+          password: myHotPassword
     initStatements:
       - CREATE TABLE TEMP (ID INT PRIMARY KEY, VAL TEXT)
       - INSERT INTO TEMP (ID, VAL) VALUES (1, 'ONE'), (4, 'FOUR')
@@ -15,7 +15,7 @@ databases:
       mode: INLINE
       byCredentials:
         - user: myUser1
-          pass: myHotPassword
+          password: myHotPassword
     initStatements:
       - CREATE TABLE TEMP (ID INT PRIMARY KEY, VAL TEXT)
       - INSERT INTO TEMP (ID, VAL) VALUES (1, 'ONE'), (4, 'FOUR')

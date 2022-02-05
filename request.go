@@ -19,13 +19,13 @@ package ws4sqlite_client
 import "errors"
 
 type credentials struct {
-	User string `json:"user"`
-	Pass string `json:"pass"`
+	User     string `json:"user"`
+	Password string `json:"password"`
 }
 
 type requestItemCrypto struct {
-	Pwd              string   `json:"pwd"`
-	Columns          []string `json:"columns"`
+	Password         string   `json:"password"`
+	Fields           []string `json:"fields"`
 	CompressionLevel int      `json:"compressionLevel,omitempty"`
 }
 
@@ -127,7 +127,7 @@ func (rb *RequestBuilder) WithValues(values map[string]interface{}) *RequestBuil
 }
 
 // Add an encoder to the request, with compression. Allowed only for statements.
-func (rb *RequestBuilder) WithEncoderAndCompression(password string, compressionLevel int, columns ...string) *RequestBuilder {
+func (rb *RequestBuilder) WithEncoderAndCompression(password string, compressionLevel int, fields ...string) *RequestBuilder {
 	if rb.err != "" {
 		return rb
 	}
@@ -135,8 +135,8 @@ func (rb *RequestBuilder) WithEncoderAndCompression(password string, compression
 		rb.err = "compressionLevel must be between 1 and 19"
 		return rb
 	}
-	if len(columns) <= 0 {
-		rb.err = "cannot specify an empty columns list"
+	if len(fields) <= 0 {
+		rb.err = "cannot specify an empty fields list"
 		return rb
 	}
 	if rb.temp.Query != "" {
@@ -144,20 +144,20 @@ func (rb *RequestBuilder) WithEncoderAndCompression(password string, compression
 		return rb
 	}
 	rb.temp.Encoder = &requestItemCrypto{
-		Pwd:              password,
+		Password:         password,
 		CompressionLevel: compressionLevel,
-		Columns:          columns,
+		Fields:           fields,
 	}
 	return rb
 }
 
 // Add an encoder to the request. Allowed only for statements.
-func (rb *RequestBuilder) WithEncoder(password string, columns ...string) *RequestBuilder {
+func (rb *RequestBuilder) WithEncoder(password string, fields ...string) *RequestBuilder {
 	if rb.err != "" {
 		return rb
 	}
-	if len(columns) <= 0 {
-		rb.err = "cannot specify an empty columns list"
+	if len(fields) <= 0 {
+		rb.err = "cannot specify an empty fields list"
 		return rb
 	}
 	if rb.temp.Query != "" {
@@ -165,19 +165,19 @@ func (rb *RequestBuilder) WithEncoder(password string, columns ...string) *Reque
 		return rb
 	}
 	rb.temp.Encoder = &requestItemCrypto{
-		Pwd:     password,
-		Columns: columns,
+		Password: password,
+		Fields:   fields,
 	}
 	return rb
 }
 
 // Add a decoder to the request. Allowed only for queries.
-func (rb *RequestBuilder) WithDecoder(password string, columns ...string) *RequestBuilder {
+func (rb *RequestBuilder) WithDecoder(password string, fields ...string) *RequestBuilder {
 	if rb.err != "" {
 		return rb
 	}
-	if len(columns) <= 0 {
-		rb.err = "cannot specify an empty columns list"
+	if len(fields) <= 0 {
+		rb.err = "cannot specify an empty fields list"
 		return rb
 	}
 	if rb.temp.Statement != "" {
@@ -185,8 +185,8 @@ func (rb *RequestBuilder) WithDecoder(password string, columns ...string) *Reque
 		return rb
 	}
 	rb.temp.Decoder = &requestItemCrypto{
-		Pwd:     password,
-		Columns: columns,
+		Password: password,
+		Fields:   fields,
 	}
 	return rb
 }

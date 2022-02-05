@@ -16,7 +16,7 @@
 
 package ws4sqlite_client
 
-// 0.9.0
+// 0.10.0
 
 import (
 	"bytes"
@@ -66,7 +66,7 @@ type ClientBuilder struct {
 	url      string
 	authMode AuthMode
 	user     string
-	pass     string
+	password string
 }
 
 // This struct represent a client for ws4sqlite. It can be constructed using the
@@ -109,18 +109,18 @@ func (cb *ClientBuilder) WithURLComponentsNoPort(protocol Protocol, host string,
 }
 
 // Builder methods that configures INLINE authentication; the remote must be configured accordingly.
-func (cb *ClientBuilder) WithInlineAuth(user, pass string) *ClientBuilder {
+func (cb *ClientBuilder) WithInlineAuth(user, password string) *ClientBuilder {
 	cb.authMode = AUTH_MODE_INLINE
 	cb.user = user
-	cb.pass = pass
+	cb.password = password
 	return cb
 }
 
 // Builder methods that configures HTTP Basic Authentication; the remote must be configured accordingly.
-func (cb *ClientBuilder) WithHTTPAuth(user, pass string) *ClientBuilder {
+func (cb *ClientBuilder) WithHTTPAuth(user, password string) *ClientBuilder {
 	cb.authMode = AUTH_MODE_HTTP
 	cb.user = user
-	cb.pass = pass
+	cb.password = password
 	return cb
 }
 
@@ -132,7 +132,7 @@ func (cb *ClientBuilder) Build() (*Client, error) {
 	if cb.authMode != AUTH_MODE_HTTP && cb.authMode != AUTH_MODE_NONE && cb.authMode != AUTH_MODE_INLINE {
 		return nil, errors.New("invalid authMode")
 	}
-	if cb.authMode != AUTH_MODE_NONE && (cb.user == "" || cb.pass == "") {
+	if cb.authMode != AUTH_MODE_NONE && (cb.user == "" || cb.password == "") {
 		return nil, errors.New("no user or password specified")
 	}
 	return &Client{*cb}, nil
@@ -146,8 +146,8 @@ func (cb *ClientBuilder) Build() (*Client, error) {
 func (c *Client) Send(req *Request) (*Response, int, error) {
 	if c.authMode == AUTH_MODE_INLINE {
 		req.req.Credentials = &credentials{
-			User: c.user,
-			Pass: c.pass,
+			User:     c.user,
+			Password: c.password,
 		}
 	}
 
@@ -162,7 +162,7 @@ func (c *Client) Send(req *Request) (*Response, int, error) {
 		return nil, 0, err
 	}
 	if c.authMode == AUTH_MODE_HTTP {
-		post.SetBasicAuth(c.user, c.pass)
+		post.SetBasicAuth(c.user, c.password)
 	}
 	post.Header.Add("Content-Type", "application/json")
 	resp, err := client.Do(post)
@@ -180,7 +180,7 @@ func (c *Client) Send(req *Request) (*Response, int, error) {
 		wserr := WsError{}
 		err = json.Unmarshal(body, &wserr)
 		if err != nil {
-			wserr.QueryIndex = -1
+			wserr.RequestIdx = -1
 			wserr.Msg = string(body)
 		}
 		wserr.Code = resp.StatusCode
