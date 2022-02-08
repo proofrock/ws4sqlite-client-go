@@ -34,7 +34,7 @@ func kill(cmd *exec.Cmd) {
 }
 
 func TestMain(m *testing.M) {
-	cmd := exec.Command("test/ws4sqlite-0.10.0", "--cfg-dir", "test/")
+	cmd := exec.Command("test/ws4sqlite-0.11.0", "--mem-db", "mydb:test/mydb.yaml", "--mem-db", "mydb2:test/mydb2.yaml")
 
 	err := cmd.Start()
 	if err != nil {
