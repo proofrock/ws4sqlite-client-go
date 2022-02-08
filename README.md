@@ -6,7 +6,7 @@ This is an implementation of a client for [ws4sqlite](https://github.com/proofro
 
 ## Compatibility
 
-Each client's minor release is guaranteed to be compatible with the matching minor release of ws4sqlite. So, for ws4sqlite's version `0.10.0`, use any of the client's `0.10.x` versions.
+Each client's minor release is guaranteed to be compatible with the matching minor release of ws4sqlite. So, for ws4sqlite's version `0.11.0`, use any of the client's `0.11.x` versions.
 
 The library requires Go 1.17 or higher.
 
