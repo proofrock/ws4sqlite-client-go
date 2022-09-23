@@ -20,6 +20,7 @@ package ws4sqlite_client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -54,14 +55,12 @@ const (
 //
 // Example:
 //
-//   cli, err := ws4.NewClientBuilder().
-//                  WithURL("http://localhost:12321/db2").
-//                  WithInlineAuth("myUser1", "myHotPassword").
-//                  Build()
+//	cli, err := ws4.NewClientBuilder().
+//	               WithURL("http://localhost:12321/db2").
+//	               WithInlineAuth("myUser1", "myHotPassword").
+//	               Build()
 //
-//   cli.Send(...)
-//
-//
+//	cli.Send(...)
 type ClientBuilder struct {
 	url      string
 	authMode AuthMode
@@ -75,12 +74,12 @@ type ClientBuilder struct {
 //
 // Example:
 //
-//   cli, err := ws4.NewClientBuilder().
-//                  WithURL("http://localhost:12321/db2").
-//                  WithInlineAuth("myUser1", "myHotPassword").
-//                  Build()
+//	cli, err := ws4.NewClientBuilder().
+//	               WithURL("http://localhost:12321/db2").
+//	               WithInlineAuth("myUser1", "myHotPassword").
+//	               Build()
 //
-//   cli.Send(...)
+//	cli.Send(...)
 type Client struct {
 	ClientBuilder
 }
@@ -144,6 +143,16 @@ func (cb *ClientBuilder) Build() (*Client, error) {
 // Returns a WsError if the remote service returns a processing error. If the
 // communication fails, it returns the "naked" error, so check for cast-ability.
 func (c *Client) Send(req *Request) (*Response, int, error) {
+	return c.SendWithContext(context.Background(), req)
+}
+
+
+// SendWithContext sends a set of requests to the remote with context, wrapped in a Request.
+// Returns a matching set of responses, wrapped in a Response struct.
+//
+// Returns a WsError if the remote service returns a processing error. If the
+// communication fails, it returns the "naked" error, so check for cast-ability.
+func (c *Client) SendWithContext(ctx context.Context, req *Request) (*Response, int, error) {
 	if c.authMode == AUTH_MODE_INLINE {
 		req.req.Credentials = &credentials{
 			User:     c.user,
@@ -157,7 +166,7 @@ func (c *Client) Send(req *Request) (*Response, int, error) {
 	}
 
 	client := &http.Client{}
-	post, err := http.NewRequest("POST", c.url, bytes.NewBuffer(jsonData))
+	post, err := http.NewRequestWithContext(ctx, "POST", c.url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, 0, err
 	}
