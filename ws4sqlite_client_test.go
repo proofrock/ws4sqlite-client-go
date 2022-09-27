@@ -17,6 +17,8 @@
 package ws4sqlite_client_test
 
 import (
+	"context"
+	"errors"
 	"os"
 	"os/exec"
 	"syscall"
@@ -34,7 +36,7 @@ func kill(cmd *exec.Cmd) {
 }
 
 func TestMain(m *testing.M) {
-	cmd := exec.Command("test/ws4sqlite-0.11.0", "--mem-db", "mydb:test/mydb.yaml", "--mem-db", "mydb2:test/mydb2.yaml")
+	cmd := exec.Command("test/ws4sqlite-0.12.2", "--mem-db", "mydb:test/mydb.yaml", "--mem-db", "mydb2:test/mydb2.yaml")
 
 	err := cmd.Start()
 	if err != nil {
@@ -242,5 +244,41 @@ func TestError(t *testing.T) {
 
 	if wserr.Code != 500 {
 		t.Error("error is not 500")
+	}
+}
+
+func TestCancel(t *testing.T) {
+	client, err := ws4.NewClientBuilder().
+		WithURLComponents(ws4.PROTOCOL_HTTP, "localhost", 12321, "mydb2").
+		WithInlineAuth("myUser1", "myHotPassword").
+		Build()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	request, err := ws4.NewRequestBuilder().
+		AddQuery("SELENCT * FROM TEMP").
+		Build()
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, code, err := client.SendWithContext(ctx, request)
+
+	if err == nil {
+		t.Error("did not fail, but should have")
+	}
+
+	if code == 200 {
+		t.Error("did return 200, but shouldn't have")
+	}
+
+	if !errors.Is(err, context.Canceled) {
+		t.Error("err is not a Context Cancelled")
 	}
 }
