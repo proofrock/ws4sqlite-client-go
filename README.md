@@ -8,6 +8,8 @@ This is an implementation of a client for [ws4sqlite](https://github.com/proofro
 
 Each client's minor release is guaranteed to be compatible with the matching minor release of ws4sqlite. So, for ws4sqlite's version `0.11.0`, use any of the client's `0.11.x` versions.
 
+In addition, versions `0.11.x` of this package are also compatible with versions `0.12.x` of ws4sqlite.
+
 The library requires Go 1.17 or higher.
 
 ## Import
@@ -61,7 +63,7 @@ if err != nil {
 }
 
 // Call ws4sqlite, obtaining a response and the status code (and a possible error)
-// Status code is !=0 if the method got a response from ws4sqlite, regardless of error.
+// Status code is !=0 if the method got a response from ws4sqlite, regardless of errors.
 res, code, err := cli.Send(req)
 
 // Code is 200?
