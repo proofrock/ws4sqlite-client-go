@@ -36,6 +36,7 @@ func kill(cmd *exec.Cmd) {
 }
 
 func TestMain(m *testing.M) {
+	// the ws4sqlite binary in the test/ folder is for Linux/amd64; make sure it's executable (chmod +x test/ws4sqlite-0.12.2)
 	cmd := exec.Command("test/ws4sqlite-0.12.2", "--mem-db", "mydb:test/mydb.yaml", "--mem-db", "mydb2:test/mydb2.yaml")
 
 	err := cmd.Start()
