@@ -146,7 +146,6 @@ func (c *Client) Send(req *Request) (*Response, int, error) {
 	return c.SendWithContext(context.Background(), req)
 }
 
-
 // SendWithContext sends a set of requests to the remote with context, wrapped in a Request.
 // Returns a matching set of responses, wrapped in a Response struct.
 //
